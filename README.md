@@ -1,3 +1,5 @@
 # Acupuntura de patos
 
-<img src="Mi_primo_chuy.png" alt="Python" align = "center">
+<p align = "center">
+<img src="Mi_primo_chuy.png" alt="Python" >
+</p>
