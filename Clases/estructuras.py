@@ -108,3 +108,43 @@ class ListaEnlazada:
         # Devolvemos la Tarea que fue eliminada para el historial/Pila
         return tarea_eliminada
 
+# --- Estructura 2: Pila (Stack) ---
+# 
+
+class Pila:
+    """
+    Implementa la estructura de datos Pila (Stack) manualmente 
+    usando una lista simple de Python y restringiendo las operaciones a LIFO.
+    """
+    def __init__(self):
+        # Utilizamos una lista como contenedor subyacente. 
+        # El 'final' de esta lista actuará como el 'tope' de la Pila.
+        self.items = [] 
+
+    # 1. Operación: Inserción (Push)
+    def push(self, elemento):
+        """Agrega un elemento al tope de la Pila."""
+        # 'append' en listas de Python es eficiente al final.
+        self.items.append(elemento)
+
+    # 2. Operación: Eliminación (Pop)
+    def pop(self):
+        """Remueve y devuelve el elemento del tope de la Pila."""
+        if not self.esta_vacia():
+            # 'pop()' sin argumento remueve el último elemento (el tope).
+            return self.items.pop() 
+        # Si la Pila está vacía, devuelve None
+        return None
+
+    # 3. Operación: Búsqueda/Visualización (Peek)
+    def peek(self):
+        """Devuelve el elemento del tope sin removerlo."""
+        if not self.esta_vacia():
+            return self.items[-1]
+        return None
+
+    # Método auxiliar
+    def esta_vacia(self):
+        """Verifica si la Pila está vacía."""
+        # Se puede implementar usando la longitud (len)
+        return len(self.items) == 0
