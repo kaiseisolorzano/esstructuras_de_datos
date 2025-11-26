@@ -1,21 +1,30 @@
+# estructuras.py
+
+# Mapa de prioridades para facilitar la comparación numérica:
+# Mayor número = Mayor prioridad (se inserta primero)
+PRIORIDAD_MAP = {
+    "Alta": 3,
+    "Media": 2,
+    "Baja": 1
+}
+
 # --- Clase Tarea (Base de Datos) ---
 
 class Tarea:
     """Define la estructura de datos para cada tarea individual."""
-    def __init__(self, titulo, descripcion, prioridad="Media"):
+    def __init__(self, titulo, descripcion="Pendiente", prioridad="Media"):
         self.titulo = titulo
         self.descripcion = descripcion
         self.prioridad = prioridad
         self.completada = False
         
     def __str__(self):
-        estado = "✅" if self.completada else "❌"
-        return f"{estado} [{self.prioridad.upper()}] {self.titulo}"
+        """Representación simple para la etiqueta de la GUI."""
+        return f"[{self.prioridad.upper()}] {self.titulo}"
 
 # ------------------------------------
 
 # --- Estructura 1: Lista Enlazada Simple ---
-# 
 
 class Nodo:
     """Representa un nodo en la lista enlazada."""
@@ -26,54 +35,57 @@ class Nodo:
 class ListaEnlazada:
     """Implementa las operaciones de la Lista Enlazada de forma manual."""
     def __init__(self):
-        self.cabeza = None  # La cabeza (head) de la lista, inicio de la estructura
+        self.cabeza = None  # La cabeza (head) de la lista
 
-    # 1. Operación: Recorrido/Visualización
-    def recorrer(self):
-        """Recorre la lista e imprime o devuelve las tareas."""
-        tareas = []
-        actual = self.cabeza
+    def get_priority_value(self, tarea):
+        """Función auxiliar para obtener el valor numérico de la prioridad."""
+        return PRIORIDAD_MAP.get(tarea.prioridad, 0)
         
-        # Iteramos hasta que 'actual' sea None, lo que marca el final de la lista
-        while actual:
-            # Agrega el objeto Tarea completo
-            tareas.append(actual.tarea)
-            # Mover al siguiente nodo
-            actual = actual.siguiente
-            
-        return tareas
-
-    # 2. Operación: Inserción
-    def insertar_al_final(self, tarea):
-        """Inserta una nueva Tarea al final de la lista."""
+    # 1. Operación: Inserción Ordenada (Core del requerimiento)
+    def insertar_ordenado(self, tarea):
+        """
+        Inserta una nueva Tarea manteniendo la lista ordenada de mayor a menor prioridad 
+        (Alta a Baja). Si las prioridades son iguales, se inserta al final de ese bloque.
+        """
         nuevo_nodo = Nodo(tarea)
+        valor_nueva = self.get_priority_value(tarea)
         
-        # Caso 1: La lista está vacía
-        if self.cabeza is None:
+        # Caso 1: La lista está vacía O la nueva tarea tiene mayor prioridad que la cabeza
+        if self.cabeza is None or valor_nueva > self.get_priority_value(self.cabeza.tarea):
+            nuevo_nodo.siguiente = self.cabeza
             self.cabeza = nuevo_nodo
             return
             
-        # Caso 2: La lista no está vacía
+        # Caso 2: Buscar la posición correcta
         actual = self.cabeza
-        # Recorremos hasta encontrar el último nodo (aquel cuyo 'siguiente' es None)
-        while actual.siguiente:
+        
+        # Recorremos mientras el siguiente nodo exista Y la prioridad del siguiente nodo 
+        # sea MAYOR o IGUAL a la nueva tarea. Cuando es menor, encontramos el punto de inserción.
+        while actual.siguiente and valor_nueva <= self.get_priority_value(actual.siguiente.tarea):
             actual = actual.siguiente
             
-        # El último nodo ahora apunta al nuevo nodo
+        # Insertar el nuevo nodo en la posición encontrada
+        nuevo_nodo.siguiente = actual.siguiente
         actual.siguiente = nuevo_nodo
-        
+
+    # 2. Operación: Recorrido/Visualización
+    def recorrer(self):
+        """Recorre la lista y devuelve las tareas en forma de lista de Python."""
+        tareas = []
+        actual = self.cabeza
+        while actual:
+            tareas.append(actual.tarea)
+            actual = actual.siguiente
+        return tareas
+
     # 3. Operación: Búsqueda
     def buscar_por_titulo(self, titulo_buscado):
         """Busca y devuelve el objeto Tarea por su título."""
         actual = self.cabeza
-        
         while actual:
             if actual.tarea.titulo.lower() == titulo_buscado.lower():
-                # Tarea encontrada
                 return actual.tarea
             actual = actual.siguiente
-            
-        # Tarea no encontrada
         return None
 
     # 4. Operación: Eliminación
@@ -83,68 +95,45 @@ class ListaEnlazada:
         anterior = None
         tarea_eliminada = None
         
-        # Búsqueda del nodo a eliminar
         while actual:
             if actual.tarea.titulo.lower() == titulo_a_eliminar.lower():
                 tarea_eliminada = actual.tarea
-                break # Encontrado
-            
+                break
             anterior = actual
             actual = actual.siguiente
         
-        # Si el nodo 'actual' es None, la tarea no se encontró
         if actual is None:
             return None # Eliminación fallida
 
-        # Caso 1: Eliminar la Cabeza (Head)
         if anterior is None:
-            # La cabeza se mueve al siguiente nodo
-            self.cabeza = actual.siguiente
-        # Caso 2: Eliminar un nodo intermedio o final
+            self.cabeza = actual.siguiente # Eliminar la Cabeza
         else:
-            # El nodo anterior apunta ahora al que seguía al nodo eliminado
-            anterior.siguiente = actual.siguiente
+            anterior.siguiente = actual.siguiente # Eliminar un nodo intermedio o final
             
-        # Devolvemos la Tarea que fue eliminada para el historial/Pila
         return tarea_eliminada
 
+# ------------------------------------
+
 # --- Estructura 2: Pila (Stack) ---
-# 
 
 class Pila:
-    """
-    Implementa la estructura de datos Pila (Stack) manualmente 
-    usando una lista simple de Python y restringiendo las operaciones a LIFO.
-    """
+    """Implementa la Pila (LIFO) manualmente con operaciones push/pop restringidas."""
     def __init__(self):
-        # Utilizamos una lista como contenedor subyacente. 
-        # El 'final' de esta lista actuará como el 'tope' de la Pila.
         self.items = [] 
 
-    # 1. Operación: Inserción (Push)
+    # Operación: Inserción (Push)
     def push(self, elemento):
         """Agrega un elemento al tope de la Pila."""
-        # 'append' en listas de Python es eficiente al final.
         self.items.append(elemento)
 
-    # 2. Operación: Eliminación (Pop)
+    # Operación: Eliminación (Pop)
     def pop(self):
         """Remueve y devuelve el elemento del tope de la Pila."""
         if not self.esta_vacia():
-            # 'pop()' sin argumento remueve el último elemento (el tope).
             return self.items.pop() 
-        # Si la Pila está vacía, devuelve None
-        return None
-
-    # 3. Operación: Búsqueda/Visualización (Peek)
-    def peek(self):
-        """Devuelve el elemento del tope sin removerlo."""
-        if not self.esta_vacia():
-            return self.items[-1]
         return None
 
     # Método auxiliar
     def esta_vacia(self):
         """Verifica si la Pila está vacía."""
-        # Se puede implementar usando la longitud (len)
         return len(self.items) == 0
