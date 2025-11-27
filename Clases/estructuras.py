@@ -13,6 +13,7 @@ PRIORIDAD_MAP = {
 class Tarea:
     """Define la estructura de datos para cada tarea individual."""
     def __init__(self, titulo, descripcion="Pendiente", prioridad="Media"):
+
         self.titulo = titulo
         self.descripcion = descripcion
         self.prioridad = prioridad
@@ -20,6 +21,7 @@ class Tarea:
         
     def __str__(self):
         """Representación simple para la etiqueta de la GUI."""
+
         return f"[{self.prioridad.upper()}] {self.titulo}"
 
 # ------------------------------------
@@ -28,17 +30,23 @@ class Tarea:
 
 class Nodo:
     """Representa un nodo en la lista enlazada."""
+
     def __init__(self, tarea):
+
         self.tarea = tarea      # El objeto Tarea (el dato)
         self.siguiente = None   # Puntero al siguiente nodo
 
 class ListaEnlazada:
     """Implementa las operaciones de la Lista Enlazada de forma manual."""
+
     def __init__(self):
+
         self.cabeza = None  # La cabeza (head) de la lista
 
     def get_priority_value(self, tarea):
+
         """Función auxiliar para obtener el valor numérico de la prioridad."""
+
         return PRIORIDAD_MAP.get(tarea.prioridad, 0)
         
     # 1. Operación: Inserción Ordenada (Core del requerimiento)
@@ -52,8 +60,10 @@ class ListaEnlazada:
         
         # Caso 1: La lista está vacía O la nueva tarea tiene mayor prioridad que la cabeza
         if self.cabeza is None or valor_nueva > self.get_priority_value(self.cabeza.tarea):
+
             nuevo_nodo.siguiente = self.cabeza
             self.cabeza = nuevo_nodo
+
             return
             
         # Caso 2: Buscar la posición correcta
@@ -70,44 +80,66 @@ class ListaEnlazada:
 
     # 2. Operación: Recorrido/Visualización
     def recorrer(self):
+
         """Recorre la lista y devuelve las tareas en forma de lista de Python."""
+
         tareas = []
         actual = self.cabeza
+
         while actual:
+
             tareas.append(actual.tarea)
             actual = actual.siguiente
+
         return tareas
 
     # 3. Operación: Búsqueda
     def buscar_por_titulo(self, titulo_buscado):
+
         """Busca y devuelve el objeto Tarea por su título."""
+
         actual = self.cabeza
+
         while actual:
+
             if actual.tarea.titulo.lower() == titulo_buscado.lower():
+
                 return actual.tarea
+            
             actual = actual.siguiente
+
         return None
 
     # 4. Operación: Eliminación
     def eliminar_por_titulo(self, titulo_a_eliminar):
+
         """Elimina el primer nodo que coincida con el título y devuelve la Tarea eliminada."""
+
         actual = self.cabeza
         anterior = None
         tarea_eliminada = None
         
         while actual:
+
             if actual.tarea.titulo.lower() == titulo_a_eliminar.lower():
+
                 tarea_eliminada = actual.tarea
+
                 break
+
             anterior = actual
             actual = actual.siguiente
         
         if actual is None:
+
             return None # Eliminación fallida
 
         if anterior is None:
+
             self.cabeza = actual.siguiente # Eliminar la Cabeza
+
         else:
+
             anterior.siguiente = actual.siguiente # Eliminar un nodo intermedio o final
             
         return tarea_eliminada
@@ -117,23 +149,34 @@ class ListaEnlazada:
 # --- Estructura 2: Pila (Stack) ---
 
 class Pila:
+
     """Implementa la Pila (LIFO) manualmente con operaciones push/pop restringidas."""
+
     def __init__(self):
+
         self.items = [] 
 
     # Operación: Inserción (Push)
     def push(self, elemento):
+
         """Agrega un elemento al tope de la Pila."""
+
         self.items.append(elemento)
 
     # Operación: Eliminación (Pop)
     def pop(self):
+
         """Remueve y devuelve el elemento del tope de la Pila."""
+
         if not self.esta_vacia():
+
             return self.items.pop() 
+        
         return None
 
     # Método auxiliar
     def esta_vacia(self):
+
         """Verifica si la Pila está vacía."""
+
         return len(self.items) == 0
