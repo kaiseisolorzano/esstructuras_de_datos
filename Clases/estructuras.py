@@ -13,7 +13,6 @@ PRIORIDAD_MAP = {
 class Tarea:
     """Define la estructura de datos para cada tarea individual."""
     def __init__(self, titulo, descripcion="Pendiente", prioridad="Media"):
-
         self.titulo = titulo
         self.descripcion = descripcion
         self.prioridad = prioridad
@@ -21,7 +20,6 @@ class Tarea:
         
     def __str__(self):
         """Representación simple para la etiqueta de la GUI."""
-
         return f"[{self.prioridad.upper()}] {self.titulo}"
 
 # ------------------------------------
@@ -30,7 +28,7 @@ class Tarea:
 
 class Nodo:
     """Representa un nodo en la lista enlazada."""
-
+    
     def __init__(self, tarea):
 
         self.tarea = tarea      # El objeto Tarea (el dato)
