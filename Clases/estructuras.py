@@ -37,9 +37,11 @@ class Tarea:
             base += f" - {self.fecha_limite}"
         return base
 
-# ------------------------------------
+# -------------------------------------------
 
 # --- Estructura 1: Lista Enlazada Simple ---
+
+# -------------------------------------------
 
 class Nodo:
     """Representa un nodo en la lista enlazada."""
@@ -79,7 +81,11 @@ class ListaEnlazada:
 
             return
             
-        # Caso 2: Buscar la posición correcta
+# ------------------------------------
+        
+# Caso 2: Buscar la posición correcta
+
+# ------------------------------------
         actual = self.cabeza
         
         # Recorremos mientras el siguiente nodo exista Y la prioridad del siguiente nodo 
@@ -91,7 +97,11 @@ class ListaEnlazada:
         nuevo_nodo.siguiente = actual.siguiente
         actual.siguiente = nuevo_nodo
 
+    # ------------------------------------
+
     # 2. Operación: Recorrido/Visualización
+
+    # ------------------------------------
     def recorrer(self):
 
         """Recorre la lista y devuelve las tareas en forma de lista de Python."""
@@ -106,7 +116,11 @@ class ListaEnlazada:
 
         return tareas
 
-    # 3. Operación: Búsqueda
+# ------------------------------------
+    
+#---- 3. Operación: Búsqueda---------
+
+# ------------------------------------
     def buscar_por_titulo(self, titulo_buscado):
 
         """Busca y devuelve el objeto Tarea por su título."""
@@ -123,7 +137,11 @@ class ListaEnlazada:
 
         return None
 
-    # 4. Operación: Eliminación
+# ------------------------------------
+
+# -----4. Operación: Eliminación-----
+
+# ------------------------------------
     def eliminar_por_titulo(self, titulo_a_eliminar):
 
         """Elimina el primer nodo que coincida con el título y devuelve la Tarea eliminada."""
@@ -159,8 +177,9 @@ class ListaEnlazada:
 
 # ------------------------------------
 
-# --- Estructura 2: Pila (Stack) ---
+# --- Estructura 2: Pila (Stack) -----
 
+# ------------------------------------
 class Pila:
 
     """Implementa la Pila (LIFO) manualmente con operaciones push/pop restringidas."""
@@ -187,7 +206,11 @@ class Pila:
         
         return None
 
-    # Método auxiliar
+# ------------------------------------
+
+#---- Método auxiliar-----------------
+
+# ------------------------------------
     def esta_vacia(self):
 
         """Verifica si la Pila está vacía."""
