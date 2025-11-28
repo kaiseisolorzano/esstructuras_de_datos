@@ -9,9 +9,9 @@ PRIORIDAD_MAP = {
 }
 
 # --- Clase Tarea (Base de Datos) ---
-
+"""
 class Tarea:
-    """Define la estructura de datos para cada tarea individual."""
+    #Define la estructura de datos para cada tarea individual.
     def __init__(self, titulo, descripcion="Pendiente", prioridad="Media"):
         self.titulo = titulo
         self.descripcion = descripcion
@@ -19,8 +19,23 @@ class Tarea:
         self.completada = False
         
     def __str__(self):
-        """Representación simple para la etiqueta de la GUI."""
+        #Representación simple para la etiqueta de la GUI.
         return f"[{self.prioridad.upper()}] {self.titulo}"
+    """
+
+class Tarea:
+    def __init__(self, titulo, descripcion="Pendiente", prioridad="Media", fecha_limite=None):
+        self.titulo = titulo
+        self.descripcion = descripcion
+        self.prioridad = prioridad
+        self.completada = False
+        self.fecha_limite = fecha_limite  # Nuevo atributo
+        
+    def __str__(self):
+        base = f"[{self.prioridad.upper()}] {self.titulo}"
+        if self.fecha_limite:
+            base += f" - {self.fecha_limite}"
+        return base
 
 # ------------------------------------
 
