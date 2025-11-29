@@ -1,11 +1,15 @@
-# main.py
+# AppPrincipal.py
+# =============================================================================
+""" Ejecutar el programa desde este archivo. """
+# -----------------------------------------------------------------------------
 
-import customtkinter as ctk  # Biblioteca para interfaces modernas
-import tkinter as tk         # Biblioteca estándar de Python para interfaces
-from tkinter import messagebox  # Para mostrar mensajes de diálogo
-from datetime import datetime, date  # Para manejar fechas y horas
+import customtkinter as ctk             # Biblioteca para interfaces modernas
+import tkinter as tk                    # Biblioteca estándar de Python para interfaces
+from tkinter import messagebox          # Para mostrar mensajes de diálogo
+from datetime import datetime, date     # Para manejar fechas y horas
 # Importamos las clases de las estructuras de datos manuales
-from estructuras import ListaEnlazada, Pila, Tarea 
+from estructuras import ListaEnlazada, Pila, Tarea
+from MantenerListas import MantenerListas # Importar clase del archivo GuardarArchivos.py   
 
 # =============================================================================
 # CONFIGURACIÓN INICIAL DE LA APLICACIÓN
@@ -36,10 +40,10 @@ class App(ctk.CTk):
         # CONFIGURACIÓN DE LA VENTANA PRINCIPAL
         # =====================================================================
         
-        self.title("Gestor de Tareas Pendientes Ordenadas por Prioridad y Fecha")
+        self.title("Gestor de Tareas | To-do")
         self.geometry("900x650")  # Ancho x Alto de la ventana
         
-        # Configuración del sistema de grid para hacer la interfaz responsive
+        # Configuración del sistema de grid para hacer la interfaz responsivo.
         # La columna 1 (área principal) se expandirá, la 0 (sidebar) mantiene tamaño fijo
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -47,18 +51,31 @@ class App(ctk.CTk):
         # =====================================================================
         # INICIALIZACIÓN DE ESTRUCTURAS DE DATOS MANUALES
         # =====================================================================
-        
+
+        # Instanciar el gestor de persistencia.
+        self.gestor_persistencia = MantenerListas()
+
+        # Intentar cargar datos guardados (si existen).
+        lista_cargada, pila_cargada = self.gestor_persistencia.cargar(ListaEnlazada, Tarea, Pila)
+
+        # Si no había datos, crear estructuras vacías.
+        self.lista_tareas = lista_cargada if lista_cargada is not None else ListaEnlazada()
+        self.pila_undo = pila_cargada if pila_cargada is not None else Pila()
+
+        ########################################################################
         # ListaEnlazada: Almacena las tareas ordenadas por prioridad
-        self.lista_tareas = ListaEnlazada()
+        #self.lista_tareas = ListaEnlazada()
         
         # Pila: Guarda las tareas eliminadas para poder deshacer (patrón LIFO)
-        self.pila_undo = Pila()
+        #self.pila_undo = Pila()
+        ########################################################################
+
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
         
         # Crear todos los elementos visuales de la interfaz
         self.crear_layout()
         
     def crear_layout(self):
-        
         """
         Construye y organiza todos los elementos visuales de la interfaz.
         Divide la pantalla en dos áreas principales: Sidebar y Área Principal.
@@ -67,7 +84,6 @@ class App(ctk.CTk):
         # =====================================================================
         # A. FRAME LATERAL (SIDEBAR) - Zona de entrada de datos y controles
         # =====================================================================
-        
         self.sidebar_frame = ctk.CTkFrame(self, width=160, corner_radius=0)
         # Posiciona el sidebar en la columna 0, que ocupa 4 filas y se expande verticalmente
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
@@ -84,7 +100,6 @@ class App(ctk.CTk):
         # =====================================================================
         # CAMPO DE ENTRADA PARA EL TÍTULO DE LA TAREA
         # =====================================================================
-        
         self.title_entry = ctk.CTkEntry(self.sidebar_frame, 
                                        placeholder_text="Título de la Tarea")
         
@@ -93,14 +108,12 @@ class App(ctk.CTk):
         # =====================================================================
         # SELECTOR DE PRIORIDAD
         # =====================================================================
-        
         ctk.CTkLabel(self.sidebar_frame, text="Prioridad:").grid(
             row=2, column=0, padx=20, pady=(10, 0), sticky="w")
         
         self.prioridades = ["Alta", "Media", "Baja"]  # Opciones de prioridad
 
         self.priority_combobox = ctk.CTkComboBox(
-
             self.sidebar_frame, 
             values=self.prioridades
         )
@@ -111,7 +124,6 @@ class App(ctk.CTk):
         # =====================================================================
         # SECCIÓN FECHA LÍMITE - Selector de fecha con día, mes y año
         # =====================================================================
-        
         ctk.CTkLabel(self.sidebar_frame, text="Fecha Límite:", 
                     font=ctk.CTkFont(size=12)).grid(
                     row=4, column=0, padx=20, pady=(10, 0), sticky="w")
@@ -122,7 +134,6 @@ class App(ctk.CTk):
         
         # Combobox para seleccionar el día (01-31)
         self.dia_combobox = ctk.CTkComboBox(
-
             fecha_frame, 
             values=[str(i).zfill(2) for i in range(1, 32)],  # zfill(2) para que sea "01", "02", etc.
             width=50
@@ -133,7 +144,6 @@ class App(ctk.CTk):
         
         # Combobox para seleccionar el mes (01-12)
         self.mes_combobox = ctk.CTkComboBox(
-
             fecha_frame, 
             values=[str(i).zfill(2) for i in range(1, 13)],
             width=50
@@ -146,12 +156,11 @@ class App(ctk.CTk):
         
         # Combobox para seleccionar el año (año actual + 2 años siguientes)
         año_actual = datetime.now().year
-        self.año_combobox = ctk.CTkComboBox(
 
+        self.año_combobox = ctk.CTkComboBox(
             fecha_frame, 
             values=[str(i) for i in range(año_actual, año_actual + 3)],
             width=60
-
         )
 
         self.año_combobox.set(str(año_actual))  # Valor por defecto: año actual
@@ -174,7 +183,6 @@ class App(ctk.CTk):
             text="🔍 BUSCAR", 
             command=self.buscar_tarea,
             fg_color="#8B9DC3"  # Color personalizado azul claro
-
         )
 
         self.search_button.grid(row=7, column=0, padx=20, pady=5, sticky="ew")
@@ -193,11 +201,9 @@ class App(ctk.CTk):
         
         # Frame desplazable que contendrá todas las tareas organizadas por meses
         self.main_scroll_frame = ctk.CTkScrollableFrame(
-
             self, 
             label_text="Lista de Tareas por Mes", 
             corner_radius=0
-
         )
 
         self.main_scroll_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
@@ -207,7 +213,6 @@ class App(ctk.CTk):
         self.actualizar_vista_tareas()
     
     def obtener_fecha_limite(self):
-
         """
         Obtiene la fecha seleccionada por el usuario y la valida.
         
@@ -216,7 +221,6 @@ class App(ctk.CTk):
         """
 
         try:
-
             # Obtener valores de los combobox y convertirlos a enteros
             dia = int(self.dia_combobox.get())
             mes = int(self.mes_combobox.get())
@@ -236,7 +240,6 @@ class App(ctk.CTk):
             return fecha_limite.strftime("%d/%m/%Y")
             
         except ValueError:
-
             # Capturar errores de fecha inválida (ej: 30 de febrero)
             messagebox.showerror("Error", "Fecha límite inválida.")
             return None
@@ -244,9 +247,7 @@ class App(ctk.CTk):
     # =========================================================================
     # MÉTODOS DE LÓGICA DE NEGOCIO - Conexión con estructuras de datos
     # =========================================================================
-    
     def agregar_tarea(self):
-
         """
         Crea una nueva tarea y la inserta en la lista enlazada de forma ordenada.
         Valida los datos de entrada antes de crear la tarea.
@@ -259,36 +260,33 @@ class App(ctk.CTk):
         
         # Validar que el título no esté vacío
         if not titulo:
-
             messagebox.showwarning("Advertencia", "Ingresa un título para la tarea.")
-
             return
             
         # Validar que la fecha sea válida
         if not fecha_limite:
-
             return  # No agregar tarea si la fecha es inválida
 
         # Crear nuevo objeto Tarea con todos los datos
         nueva_tarea = Tarea(
-
             titulo=titulo, 
             descripcion="Pendiente",
             prioridad=prioridad_seleccionada,
             fecha_limite=fecha_limite
-
         )
 
         # LLAMADA AL MÉTODO DE INSERCIÓN ORDENADA en la lista enlazada
         # La lista se mantiene automáticamente ordenada por prioridad
         self.lista_tareas.insertar_ordenado(nueva_tarea)
+
+        # Guardar cambios inmediatamente
+        self.gestor_persistencia.guardar(self.lista_tareas, self.pila_undo)
         
         # Limpiar el campo de título y actualizar la vista
         self.title_entry.delete(0, 'end')  # Borrar desde posición 0 hasta el final
         self.actualizar_vista_tareas()  # Refrescar la interfaz
         
     def deshacer_accion(self):
-
         """
         Recupera la última tarea eliminada usando la pila (patrón LIFO).
         Si la pila está vacía, muestra un mensaje informativo.
@@ -298,38 +296,39 @@ class App(ctk.CTk):
         tarea_revertida = self.pila_undo.pop() 
         
         if tarea_revertida:
-
             # Reinsertar la tarea en la lista enlazada (manteniendo el orden por prioridad)
             self.lista_tareas.insertar_ordenado(tarea_revertida)
+
+            # Guardar cambios
+            self.gestor_persistencia.guardar(self.lista_tareas, self.pila_undo)
+
             self.actualizar_vista_tareas()  # Refrescar la vista
 
         else:
-
             # La pila está vacía
             messagebox.showinfo("Información", "No hay acciones para deshacer.")
             
     def eliminar_tarea_gui(self, titulo):
-
         """
         Elimina una tarea de la lista y la guarda en la pila para posible deshacer.
         
         Args:
-
             titulo (str): Título de la tarea a eliminar
-
         """
 
         # LLAMADA A LA OPERACIÓN DE ELIMINACIÓN en la lista enlazada
         tarea_eliminada = self.lista_tareas.eliminar_por_titulo(titulo)
         
         if tarea_eliminada:
-
             # LLAMADA A LA OPERACIÓN PUSH DE LA PILA - guardar para deshacer
             self.pila_undo.push(tarea_eliminada)
+
+            # Guardar cambios
+            self.gestor_persistencia.guardar(self.lista_tareas, self.pila_undo)
+
             self.actualizar_vista_tareas()  # Refrescar la vista
             
     def toggle_estado_tarea(self, titulo):
-
         """
         Cambia el estado de una tarea entre completada y pendiente.
         
@@ -341,9 +340,12 @@ class App(ctk.CTk):
         tarea = self.lista_tareas.buscar_por_titulo(titulo)
         
         if tarea:
-
             # Alternar el estado de completada (True/False)
             tarea.completada = not tarea.completada
+
+            # Guardar el cambio de estado
+            self.gestor_persistencia.guardar(self.lista_tareas, self.pila_undo)
+
             self.actualizar_vista_tareas()  # Refrescar la vista
 
     # =========================================================================
@@ -351,7 +353,6 @@ class App(ctk.CTk):
     # =========================================================================
 
     def organizar_tareas_por_mes(self, tareas):
-
         """
         Agrupa las tareas por mes y año basándose en su fecha límite.
         
@@ -384,7 +385,6 @@ class App(ctk.CTk):
                     tareas_por_mes[mes_año].append(tarea)
                     
                 except ValueError:
-
                     # Si hay error en el formato de fecha, poner en "Sin Fecha"
                     if "Sin Fecha" not in tareas_por_mes:
 
@@ -392,7 +392,6 @@ class App(ctk.CTk):
 
                     tareas_por_mes["Sin Fecha"].append(tarea)
             else:
-
                 # Tareas sin fecha límite van a la sección "Sin Fecha"
                 if "Sin Fecha" not in tareas_por_mes:
 
@@ -403,7 +402,6 @@ class App(ctk.CTk):
         return tareas_por_mes
 
     def actualizar_vista_tareas(self):
-
         """
         Actualiza completamente la interfaz gráfica mostrando todas las tareas
         organizadas por meses en orden cronológico.
@@ -420,11 +418,9 @@ class App(ctk.CTk):
         
         # Si no hay tareas, mostrar mensaje de "todo listo"
         if not tareas:
-
             ctk.CTkLabel(self.main_scroll_frame, 
                         text="¡Todo listo! No hay tareas pendientes.").pack(
                         padx=20, pady=20)
-            
             return
 
         # Organizar tareas por mes usando el método auxiliar
@@ -443,7 +439,6 @@ class App(ctk.CTk):
             seccion_mes.pack(fill="x", padx=10, pady=15)
 
     def ordenar_meses_cronologicamente(self, meses):
-
         """
         Ordena una lista de meses en orden cronológico.
         
@@ -461,11 +456,9 @@ class App(ctk.CTk):
         for mes in meses:
 
             if mes == "Sin Fecha":
-
                 meses_sin_fecha.append(mes)
 
             else:
-
                 meses_ordenados.append(mes)
         
         # Ordenar meses con fecha convertiéndolos a objetos datetime para comparar
@@ -475,7 +468,6 @@ class App(ctk.CTk):
         return meses_ordenados + meses_sin_fecha
 
     def crear_seccion_mes(self, mes_año, tareas):
-
         """
         Crea una sección visual completa para un mes específico.
         
@@ -499,12 +491,10 @@ class App(ctk.CTk):
         
         # Etiqueta con el nombre del mes en negrita y blanco
         mes_label = ctk.CTkLabel(
-
             header_frame, 
             text=mes_año,
             font=ctk.CTkFont(size=16, weight="bold"),
             text_color="white"
-
         )
 
         mes_label.pack(padx=15, pady=8)
@@ -536,13 +526,11 @@ class App(ctk.CTk):
         # =====================================================================
         
         if tarea.completada:
-
             # Tarea completada: texto gris y tachado
             text_color = "gray" 
             font_style = ctk.CTkFont(size=14, weight="normal", overstrike=1) 
 
         else:
-
             # Tarea pendiente: texto blanco azulado normal
             text_color = "#DCE4EE" 
             font_style = ctk.CTkFont(size=14, weight="normal")
@@ -558,7 +546,6 @@ class App(ctk.CTk):
         # =====================================================================
         # CHECKBOX - Para marcar tarea como completada/pendiente
         # =====================================================================
-        
         check_box = ctk.CTkCheckBox(
 
             contenido_frame,
@@ -618,7 +605,6 @@ class App(ctk.CTk):
         # =====================================================================
         # BOTÓN DE ELIMINACIÓN
         # =====================================================================
-        
         delete_button = ctk.CTkButton(
 
             contenido_frame, 
@@ -632,7 +618,6 @@ class App(ctk.CTk):
     # =========================================================================
     # FUNCIÓN DE BÚSQUEDA
     # =========================================================================
-    
     def buscar_tarea(self):
         """
         Busca una tarea por título y muestra el resultado en un mensaje.
@@ -643,7 +628,6 @@ class App(ctk.CTk):
         
         # Validar que no esté vacío
         if not titulo_buscado:
-
             messagebox.showwarning("Advertencia", "Ingresa un título para buscar.")
             return
         
@@ -651,7 +635,6 @@ class App(ctk.CTk):
         tarea_encontrada = self.lista_tareas.buscar_por_titulo(titulo_buscado)
         
         if tarea_encontrada:
-
             # Preparar información detallada de la tarea encontrada
             estado = "Completada" if tarea_encontrada.completada else "Pendiente"
             fecha = tarea_encontrada.fecha_limite if hasattr(tarea_encontrada, 'fecha_limite') else "No especificada"
@@ -663,16 +646,20 @@ class App(ctk.CTk):
             messagebox.showinfo("Resultado de Búsqueda", mensaje)
 
         else:
-
             # Tarea no encontrada
             messagebox.showinfo("Resultado de Búsqueda", f"La tarea '{titulo_buscado}' no se encontró.")
+    
+    def _on_close(self):
+        try:
+            self.gestor_persistencia.guardar(self.lista_tareas, self.pila_undo)
+        except Exception:
+            pass
+        self.destroy()
 
 # =============================================================================
 # PUNTO DE ENTRADA DE LA APLICACIÓN
 # =============================================================================
-
 if __name__ == "__main__":
-
     # Crear instancia de la aplicación y ejecutar el loop principal
     app = App()
     app.mainloop()  # Este método mantiene la aplicación corriendo

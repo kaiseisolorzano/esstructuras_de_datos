@@ -1,4 +1,8 @@
 # estructuras.py
+# -----------------------------------------------------------------------------
+# Archivo donde se encuentran las clases para las tareas/actividades que 
+# generará el usuario.
+# -----------------------------------------------------------------------------
 
 # Mapa de prioridades para facilitar la comparación numérica:
 # Mayor número = Mayor prioridad (se inserta primero)
@@ -9,20 +13,6 @@ PRIORIDAD_MAP = {
 }
 
 # --- Clase Tarea (Base de Datos) ---
-"""
-class Tarea:
-    #Define la estructura de datos para cada tarea individual.
-    def __init__(self, titulo, descripcion="Pendiente", prioridad="Media"):
-        self.titulo = titulo
-        self.descripcion = descripcion
-        self.prioridad = prioridad
-        self.completada = False
-        
-    def __str__(self):
-        #Representación simple para la etiqueta de la GUI.
-        return f"[{self.prioridad.upper()}] {self.titulo}"
-    """
-
 class Tarea:
     def __init__(self, titulo, descripcion="Pendiente", prioridad="Media", fecha_limite=None):
         self.titulo = titulo
