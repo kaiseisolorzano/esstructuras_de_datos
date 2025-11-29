@@ -62,14 +62,6 @@ class App(ctk.CTk):
         self.lista_tareas = lista_cargada if lista_cargada is not None else ListaEnlazada()
         self.pila_undo = pila_cargada if pila_cargada is not None else Pila()
 
-        ########################################################################
-        # ListaEnlazada: Almacena las tareas ordenadas por prioridad
-        #self.lista_tareas = ListaEnlazada()
-        
-        # Pila: Guarda las tareas eliminadas para poder deshacer (patrón LIFO)
-        #self.pila_undo = Pila()
-        ########################################################################
-
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         
         # Crear todos los elementos visuales de la interfaz
