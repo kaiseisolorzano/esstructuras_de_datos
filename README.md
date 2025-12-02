@@ -7,3 +7,4 @@ XDDDDDDDD
 <p align = "center">
 <img src="Mi_primo_chuy.png" alt="Python" >
 </p>
+Ese we nunca lo agregaron XDDDD
